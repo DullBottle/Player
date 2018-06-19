@@ -319,7 +319,7 @@ open class Player: UIViewController {
 
     public required init?(coder aDecoder: NSCoder) {
         self._avplayer = AVPlayer()
-        self._avplayer.actionAtItemEnd = .pause
+        self._avplayer.actionAtItemEnd = .none
         self._timeObserver = nil
         
         super.init(coder: aDecoder)
@@ -327,7 +327,7 @@ open class Player: UIViewController {
 
     public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         self._avplayer = AVPlayer()
-        self._avplayer.actionAtItemEnd = .pause
+        self._avplayer.actionAtItemEnd = .none
         self._timeObserver = nil
         
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -490,6 +490,8 @@ extension Player {
         
         if let url = url {
             let asset = AVURLAsset(url: url, options: .none)
+            // disk cache core.
+            asset.resourceLoader.setDelegate(self, queue: DispatchQueue.main)
             self.setupAsset(asset)
         }
     }
@@ -568,6 +570,13 @@ extension Player {
 
 }
 
+// MARK: - Disk Cache
+
+extension Player: AVAssetResourceLoaderDelegate {
+    
+}
+
+
 // MARK: - NSNotifications
 
 extension Player {
@@ -586,6 +595,22 @@ extension Player {
                     self.stop()
                 })
             }
+        }
+        
+        // ⚠️ save to disk the buffer.
+        if let asset = _asset {
+            let exporter = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)
+            let name = "\(url?.query ?? "default")"
+            let outputUrl = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                .appendingPathComponent(name)
+                .appendingPathExtension("mp4")
+            print(outputUrl.path)
+            exporter?.outputURL = outputUrl
+            exporter?.outputFileType = .mp4
+            exporter?.exportAsynchronously(completionHandler: {
+                print(exporter?.status.rawValue ?? 200)
+                print(exporter?.error?.localizedDescription ?? "- no error -")
+            })
         }
     }
 

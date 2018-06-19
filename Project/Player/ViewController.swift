@@ -26,7 +26,9 @@
 
 import UIKit
 
-let videoUrl = URL(string: "https://v.cdn.vine.co/r/videos/AA3C120C521177175800441692160_38f2cbd1ffb.1.5.13763579289575020226.mp4")!
+let videoUrl = URL(string: "https://aweme.snssdk.com/aweme/v1/playwm/?video_id=38017f524e63410993edcb2709da08a2&line=0")!
+
+//"/Users/admin/Library/Developer/CoreSimulator/Devices/6868386D-B860-4AAB-8F7D-4DE5F81F8ECA/data/Containers/Data/Application/7FABFB3D-9D9F-4034-B3F3-6F55D237DDA3/tmp/video_id=38017f524e63410993edcb2709da08a2&line=0.mp4"
 
 class ViewController: UIViewController {
 
@@ -54,6 +56,10 @@ class ViewController: UIViewController {
         self.view.addSubview(self.player.view)
         self.player.didMove(toParentViewController: self)
         
+        let url = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent("video_id=38017f524e63410993edcb2709da08a2&line=0")
+            .appendingPathExtension("mp4")
+        print(url)
         self.player.url = videoUrl
         
         self.player.playbackLoops = true
